@@ -1,4 +1,4 @@
-import { useState,useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
     DndContext,
     DragOverlay,
@@ -7,16 +7,34 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import { INITIAL_DATA } from "../data";
+import { LogOut } from "lucide-react";
 import { ColumnContainer } from "./ColumnContainer";
 import { createPortal } from "react-dom";
 import { TaskCard } from "./TaskCard";
 
-export const KanbanBoard = () => {
-    const [columns, setColumns] = useState(INITIAL_DATA);
+export const KanbanBoard = ({ user, onLogout }) => {
+
+    const userKey = `kanban-data-${user}`;
+
+    const [columns, setColumns] = useState(() => {
+        const savedData = localStorage.getItem(userKey);
+        if (savedData) {
+            return JSON.parse(savedData);
+        }
+        return [];
+    });
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [activeColumn, setActiveColumn] = useState(null);
     const [activeTask, setActiveTask] = useState(null);
+    const [showAddColumnModal, setShowAddColumnModal] = useState(false);
+    const [newColumnTitle, setNewColumnTitle] = useState("");
+    const [columnToDelete, setColumnToDelete] = useState(null);
+    const [editingColumn, setEditingColumn] = useState(null);
     const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
+
+    useEffect(() => {
+        localStorage.setItem(userKey, JSON.stringify(columns));
+    }, [columns, userKey]);
 
     const createNewTask = (columnId) => {
         const newTask = {
@@ -33,6 +51,11 @@ export const KanbanBoard = () => {
             });
             return newColumns;
         });
+    };
+
+    const openCreateColumnModal = () => {
+        setNewColumnTitle("");
+        setShowAddColumnModal(true);
     };
 
     const updateTask = (id, content) => {
@@ -67,25 +90,43 @@ export const KanbanBoard = () => {
         });
     };
 
-    const createNewColumn = () => {
-        const title = window.prompt("Nombre de la nueva columna:");
-
-        if (!title) return;
+    const confirmCreateColumn = () => {
+        if (!newColumnTitle.trim()) return;
 
         const newColumn = {
             id: "col-" + generateId(),
-            title: title,
+            title: newColumnTitle,
             tasks: [],
         };
 
         setColumns([...columns, newColumn]);
+        setShowAddColumnModal(false);
     };
 
-    const deleteColumn = (columnId) => {
-        if (window.confirm("¿Seguro que quieres borrar esta columna y sus tareas?")) {
-            const newColumns = columns.filter((col) => col.id !== columnId);
-            setColumns(newColumns);
-        }
+    const confirmEditColumn = () => {
+        if (!editingColumn || !editingColumn.title.trim()) return;
+
+        setColumns((prev) =>
+            prev.map((col) => {
+                if (col.id === editingColumn.id) {
+                    return { ...col, title: editingColumn.title };
+                }
+                return col;
+            })
+        );
+        setEditingColumn(null);
+    };
+
+    const openDeleteColumnModal = (columnId) => {
+        setColumnToDelete(columnId);
+    };
+
+    const confirmDeleteColumn = () => {
+        if (!columnToDelete) return;
+
+        const newColumns = columns.filter((col) => col.id !== columnToDelete);
+        setColumns(newColumns);
+        setColumnToDelete(null);
     };
 
     const sensors = useSensors(
@@ -194,7 +235,6 @@ export const KanbanBoard = () => {
             return;
         }
 
-        // Si arrastramos una TAREA
         if (event.active.data.current?.type === "Task") {
             setActiveTask(event.active.data.current.task);
             return;
@@ -209,7 +249,14 @@ export const KanbanBoard = () => {
             onDragEnd={onDragEnd}
         >
             <div className="kanban-board">
-                {/* El SortableContext envuelve al mapeo */}
+
+                <div className="board-header-info">
+                    <span className="user-welcome">Hola, <b>{user}</b> 👋</span>
+                    <button className="btn-logout" onClick={onLogout} title="Cerrar Sesión">
+                        <LogOut size={18} /> Salir
+                    </button>
+                </div>
+
                 <SortableContext items={columnsId} strategy={horizontalListSortingStrategy}>
                     {columns.map((col) => (
                         <ColumnContainer
@@ -218,34 +265,85 @@ export const KanbanBoard = () => {
                             createTask={createNewTask}
                             deleteTask={deleteTask}
                             updateTask={updateTask}
-                            deleteColumn={deleteColumn}
+                            deleteColumn={openDeleteColumnModal}
+                            updateColumn={(id) => {
+                                const colToEdit = columns.find(c => c.id === id);
+                                setEditingColumn({ ...colToEdit }); 
+                            }}
                         />
                     ))}
                 </SortableContext>
 
-                <button className="btn-add-column" onClick={createNewColumn}>
+                <button className="btn-add-column" onClick={openCreateColumnModal}>
                     + Añadir Columna
                 </button>
             </div>
 
             {createPortal(
-                <DragOverlay>
-                    {/* Caso A: Estamos arrastrando una Columna */}
-                    {activeColumn && (
-                        <ColumnContainer
-                            column={activeColumn}
-                            createTask={createNewTask}
-                            deleteTask={deleteTask}
-                            updateTask={updateTask}
-                            deleteColumn={deleteColumn}
-                        />
+                <>
+                    <DragOverlay>
+                        {activeColumn && <ColumnContainer column={activeColumn} />}
+                        {activeTask && <TaskCard task={activeTask} />}
+                    </DragOverlay>
+
+                    {showAddColumnModal && (
+                        <div className="modal-overlay" onClick={() => setShowAddColumnModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">Nueva Columna</div>
+                                <div className="modal-body">
+                                    <input
+                                        className="modal-input"
+                                        placeholder="Ej: Testing, En Revisión..."
+                                        value={newColumnTitle}
+                                        autoFocus
+                                        onChange={(e) => setNewColumnTitle(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && confirmCreateColumn()}
+                                    />
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn-modal btn-secondary" onClick={() => setShowAddColumnModal(false)}>Cancelar</button>
+                                    <button className="btn-modal btn-primary" onClick={confirmCreateColumn}>Crear</button>
+                                </div>
+                            </div>
+                        </div>
                     )}
 
-                    {/* Caso B: Estamos arrastrando una Tarea */}
-                    {activeTask && (
-                        <TaskCard task={activeTask} deleteTask={deleteTask} updateTask={updateTask} />
+                    {columnToDelete && (
+                        <div className="modal-overlay" onClick={() => setColumnToDelete(null)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">¿Borrar columna?</div>
+                                <div className="modal-body">
+                                    <p>Se eliminarán todas las tareas que contenga. Esta acción no se puede deshacer.</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn-modal btn-secondary" onClick={() => setColumnToDelete(null)}>Cancelar</button>
+                                    <button className="btn-modal btn-danger" onClick={confirmDeleteColumn}>Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
                     )}
-                </DragOverlay>,
+
+                    {editingColumn && (
+                        <div className="modal-overlay" onClick={() => setEditingColumn(null)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">Editar Columna</div>
+                                <div className="modal-body">
+                                    <input
+                                        className="modal-input"
+                                        value={editingColumn.title}
+                                        autoFocus
+                                        onChange={(e) => setEditingColumn({ ...editingColumn, title: e.target.value })}
+                                        onKeyDown={(e) => e.key === "Enter" && confirmEditColumn()}
+                                    />
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn-modal btn-secondary" onClick={() => setEditingColumn(null)}>Cancelar</button>
+                                    <button className="btn-modal btn-primary" onClick={confirmEditColumn}>Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>,
                 document.body
             )}
         </DndContext>

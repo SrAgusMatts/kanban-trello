@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Edit2 } from "lucide-react";
 import { TaskCard } from "./TaskCard";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -9,13 +9,14 @@ export const ColumnContainer = ({
     createTask,
     deleteTask,
     updateTask,
-    deleteColumn
+    deleteColumn,
+    updateColumn,
 }) => {
     const taskIds = useMemo(() => {
         return column.tasks.map((task) => task.id);
     }, [column.tasks]);
 
-    const { setNodeRef, attributes, listeners,transform, transition, isDragging } = useSortable({
+    const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
         id: column.id,
         data: {
             type: "Column",
@@ -58,6 +59,14 @@ export const ColumnContainer = ({
 
                     <button className="btn-add" onClick={() => createTask(column.id)}>
                         <PlusCircle size={18} />
+                    </button>
+
+                    <button
+                        className="btn-edit-column"
+                        onClick={() => updateColumn(column.id)}
+                        title="Renombrar columna"
+                    >
+                        <Edit2 size={18} />
                     </button>
 
                     <button
