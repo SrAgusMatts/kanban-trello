@@ -1,5 +1,4 @@
-/* 
-  =========================================
+/* =========================================
    VARIABLES & GLOBALES
   ========================================= 
 */
@@ -27,8 +26,7 @@ body {
   overflow-x: auto;
 }
 
-/* 
-  =========================================
+/* =========================================
    ESTRUCTURA DEL TABLERO
   ========================================= 
 */
@@ -39,8 +37,7 @@ body {
   align-items: flex-start;
 }
 
-/* 
-  =========================================
+/* =========================================
    COLUMNAS
   ========================================= 
 */
@@ -85,9 +82,8 @@ body {
   min-height: 100px;
 }
 
-/* 
-  =========================================
-   BOTÓN AÑADIR (COLUMNA)
+/* =========================================
+   BOTÓN AÑADIR (TAREA EN COLUMNA)
   ========================================= 
 */
 
@@ -105,24 +101,24 @@ body {
   background-color: #30363d;
 }
 
-/* 
-  =========================================
+/* =========================================
    TARJETA DE TAREA (VISTA NORMAL)
    ========================================= 
 */
 
 .task-card {
   background-color: var(--bg-card);
-  padding: 10px 10px 2px 10px !important;
+  padding: 12px;
   position: relative;
-  min-height: 100px;
   box-sizing: border-box;
   border-radius: 8px;
   border: 1px solid #30363d;
   cursor: grab;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  min-height: 60px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -130,32 +126,46 @@ body {
   border-color: var(--accent-color);
 }
 
-.btn-delete {
+.task-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+}
+
+.btn-delete,
+.btn-action {
   background: transparent;
   border: none;
   color: #8b949e;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .btn-delete:hover {
   color: var(--danger-color);
+  background-color: #30363d;
 }
 
-.task-card:hover .btn-delete {
-  opacity: 1;
+.btn-action:hover {
+  color: var(--accent-color);
+  background-color: #30363d;
 }
 
-/* 
-  =========================================
-   MODO EDICIÓN (INPUTS & ACCIONES)
-  ========================================= 
+/* =========================================
+   MODO EDICIÓN (INPUTS & BOTÓN GUARDAR)
+   ========================================= 
 */
 
 .task-card-editing {
   min-height: 150px;
   cursor: default;
+  display: flex;
+  flex-direction: column;
 }
 
 .task-card-editing .task-input {
@@ -172,30 +182,8 @@ body {
   font-size: 1rem;
   resize: none;
   outline: none;
-  padding: 9px;
+  padding: 0;
   margin: 0;
-}
-
-.task-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-left: 10px;
-}
-
-.btn-action {
-  background: transparent;
-  border: none;
-  color: #8b949e;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.btn-action:hover {
-  background-color: #30363d;
-  color: var(--accent-color);
 }
 
 .btn-save {
@@ -221,8 +209,7 @@ body {
   background-color: #4a9eff;
 }
 
-/* 
-  =========================================
+/* =========================================
    CUSTOM SCROLLBAR
   ========================================= 
 */
@@ -246,15 +233,14 @@ body {
   background-color: #6e7681;
 }
 
-/* 
-  =========================================
-   BOTÓN AÑADIR COLUMNA
+/* =========================================
+   BOTÓN AÑADIR COLUMNA & EDICIÓN COLUMNA
   ========================================= 
 */
 
 .btn-add-column {
-  min-width: 350px; 
-  height: 100px; 
+  min-width: 350px;
+  height: 100px;
   background-color: transparent;
   border: 2px dashed #30363d;
   border-radius: 10px;
@@ -267,6 +253,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  margin-left: 20px;
 }
 
 .btn-add-column:hover {
@@ -275,7 +262,8 @@ body {
   background-color: rgba(88, 166, 255, 0.05);
 }
 
-.btn-delete-column {
+.btn-delete-column,
+.btn-edit-column {
   background: transparent;
   border: none;
   color: #8b949e;
@@ -289,22 +277,12 @@ body {
   background-color: #30363d;
 }
 
-.btn-edit-column {
-  background: transparent;
-  border: none;
-  color: #8b949e;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
-}
-
 .btn-edit-column:hover {
   color: var(--accent-color);
   background-color: #30363d;
 }
 
-/* 
-  =========================================
+/* =========================================
    MODALES
   ========================================= 
 */
@@ -315,15 +293,14 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Oscuro semi-transparente */
-  backdrop-filter: blur(3px); /* Efecto borroso bonito */
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Por encima de todo */
+  z-index: 1000;
 }
 
-/* La cajita del modal */
 .modal-content {
   background-color: var(--bg-card);
   padding: 20px;
@@ -331,13 +308,20 @@ body {
   border: 1px solid #30363d;
   width: 400px;
   max-width: 90%;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  animation: popIn 0.2s ease-out; /* Animación de entrada */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  animation: popIn 0.2s ease-out;
 }
 
 @keyframes popIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -360,7 +344,8 @@ body {
   color: var(--text-main);
   font-size: 1rem;
   outline: none;
-  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .modal-input:focus {
@@ -387,17 +372,31 @@ body {
   border: 1px solid #30363d;
   color: var(--text-main);
 }
-.btn-secondary:hover { background-color: #30363d; }
+
+.btn-secondary:hover {
+  background-color: #30363d;
+}
 
 .btn-primary {
   background-color: var(--accent-color);
   color: white;
 }
-.btn-primary:hover { opacity: 0.9; }
 
-/* 
-  =========================================
-    PÁGINA DE LOGIN Y LOGOUT
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/* =========================================
+   PÁGINA DE LOGIN Y LOGOUT
   ========================================= 
 */
 
@@ -417,7 +416,7 @@ body {
   width: 100%;
   max-width: 400px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .login-title {
@@ -463,14 +462,15 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  z-index: 100; /* Por encima de las columnas */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 100;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .user-welcome {
   color: var(--text-main);
   font-size: 0.9rem;
 }
+
 .user-welcome b {
   color: var(--accent-color);
 }
@@ -491,4 +491,113 @@ body {
 .btn-logout:hover {
   background-color: rgba(248, 81, 73, 0.1);
   color: var(--danger-color);
+}
+
+/* =========================================
+   ETIQUETAS (TAGS)
+  ========================================= 
+*/
+
+.task-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+}
+
+.task-tag-mini {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.task-content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--text-main);
+  padding-right: 50px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tags-selector {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 10px;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag-pill {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.tag-pill:hover {
+  transform: scale(1.05);
+  opacity: 0.8 !important;
+}
+
+.tag-pill.selected {
+  font-weight: bold;
+}
+
+select.modal-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23c9d1d9%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px top 50%;
+  background-size: 12px auto;
+  padding-right: 30px;
+}
+
+select.modal-input option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  padding: 10px;
+}
+
+/* =========================================
+   CORRECCIÓN DE SCROLLBARS EN MODALES
+  ========================================= 
+*/
+
+.modal-input::-webkit-scrollbar,
+.tags-management-list::-webkit-scrollbar {
+  width: 12px; /* Un poco más ancho para dejar espacio al borde */
+}
+
+.modal-input::-webkit-scrollbar-track,
+.tags-management-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-input::-webkit-scrollbar-thumb,
+.tags-management-list::-webkit-scrollbar-thumb {
+  background-color: #4a515a;
+  border-radius: 10px; /* Bordes bien redondos */
+  border: 4px solid transparent; /* Truco: Borde transparente grueso */
+  background-clip: content-box; /* Truco: El color solo pinta el interior, respetando el borde */
+}
+
+.modal-input::-webkit-scrollbar-thumb:hover,
+.tags-management-list::-webkit-scrollbar-thumb:hover {
+  background-color: #6e7681;
 }

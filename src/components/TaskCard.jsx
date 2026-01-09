@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Trash2, Edit, Check } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Trash2, Edit } from "lucide-react";
 
-export const TaskCard = ({ task, deleteTask, updateTask }) => {
-  const [editMode, setEditMode] = useState(false);
+export const TaskCard = ({ task, deleteTask, openEditModal }) => {
   const [mouseIsOver, setMouseIsOver] = useState(false);
 
   const {
@@ -20,7 +19,6 @@ export const TaskCard = ({ task, deleteTask, updateTask }) => {
       type: "Task",
       task,
     },
-    disabled: editMode,
   });
 
   const style = {
@@ -28,54 +26,13 @@ export const TaskCard = ({ task, deleteTask, updateTask }) => {
     transform: CSS.Transform.toString(transform),
   };
 
-  const toggleEditMode = () => {
-    setEditMode((prev) => !prev);
-    setMouseIsOver(false);
-  };
-
   if (isDragging) {
     return (
       <div
         ref={setNodeRef}
-        style={{ ...style, opacity: 0.3, border: "2px dashed #58a6ff" }}
-        className="task-card"
-      />
-    );
-  }
-
-  if (editMode) {
-    return (
-      <div
-        ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        className="task-card task-card-editing"
-      >
-        <textarea
-          className="task-input"
-          value={task.content}
-          autoFocus
-          placeholder="Escribe tu tarea aquí..."
-          onBlur={toggleEditMode}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              toggleEditMode();
-            }
-          }}
-          onChange={(e) => updateTask(task.id, e.target.value)}
-        ></textarea>
-
-        <button 
-            className="btn-save" 
-            onMouseDown={(e) => {
-                e.preventDefault(); 
-                toggleEditMode();
-            }}
-        >
-            <Check size={16} />
-        </button>
-      </div>
+        className="task-card opacity-30 border-2 border-blue-500"
+      />
     );
   }
 
@@ -89,26 +46,42 @@ export const TaskCard = ({ task, deleteTask, updateTask }) => {
       onMouseEnter={() => setMouseIsOver(true)}
       onMouseLeave={() => setMouseIsOver(false)}
     >
-      <p style={{ whiteSpace: "pre-wrap", overflow: "hidden" }}>
-        {task.content}
-      </p>
+      {task.tags && task.tags.length > 0 && (
+        <div className="task-tags-container">
+          {task.tags.map((tag, index) => (
+            <span
+              key={index}
+              className="task-tag-mini"
+              style={{ backgroundColor: tag.color }}
+            >
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <p className="task-content">{task.content}</p>
 
       {mouseIsOver && (
         <div className="task-actions">
-          <button 
-            className="btn-action" 
-            onClick={toggleEditMode}
-            title="Editar"
+          <button
+            className="btn-action"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditModal(task);
+            }}
           >
-            <Edit size={16} />
+            <Edit size={18} />
           </button>
-          
-          <button 
-            className="btn-action btn-delete" 
-            onClick={() => deleteTask(task.id)}
-            title="Borrar"
+
+          <button
+            className="btn-delete"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteTask(task.id);
+            }}
           >
-            <Trash2 size={16} />
+            <Trash2 size={18} />
           </button>
         </div>
       )}

@@ -11,6 +11,7 @@ export const ColumnContainer = ({
     updateTask,
     deleteColumn,
     updateColumn,
+    openEditModal,
 }) => {
     const taskIds = useMemo(() => {
         return column.tasks.map((task) => task.id);
@@ -88,6 +89,7 @@ export const ColumnContainer = ({
                             task={task}
                             deleteTask={deleteTask}
                             updateTask={updateTask}
+                            openEditModal={openEditModal}
                         />
                     ))}
                 </SortableContext>
