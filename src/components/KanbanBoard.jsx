@@ -16,7 +16,6 @@ import { createPortal } from "react-dom";
 import { TaskCard } from "./TaskCard";
 import { LogOut, Plus, Settings, Trash2, AlertTriangle } from "lucide-react";
 
-// Etiquetas por defecto (solo si el usuario es nuevo)
 const DEFAULT_TAGS = [
   { name: "Urgente", color: "#ef4444" },
   { name: "Diseño", color: "#a855f7" },
@@ -55,7 +54,6 @@ export const KanbanBoard = ({ user, onLogout }) => {
     return DEFAULT_TAGS;
   });
 
-  // Estados
   const [isManagingTags, setIsManagingTags] = useState(false);
   const [activeColumn, setActiveColumn] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
@@ -67,12 +65,10 @@ export const KanbanBoard = ({ user, onLogout }) => {
   const [editTaskContent, setEditTaskContent] = useState("");
   const [editTaskTags, setEditTaskTags] = useState([]);
 
-  // Estados Creación de Etiqueta
   const [isCreatingTag, setIsCreatingTag] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#58a6ff");
 
-  // Estado para el modal de borrar etiqueta
   const [tagToDelete, setTagToDelete] = useState(null);
 
   const sensors = useSensors(
@@ -97,23 +93,20 @@ export const KanbanBoard = ({ user, onLogout }) => {
 
     const newTag = { name: newTagName.trim(), color: newTagColor };
     setAvailableTags([...availableTags, newTag]);
-    setEditTaskTags([...editTaskTags, newTag]); // Agregarla a la tarea actual también
+    setEditTaskTags([...editTaskTags, newTag]);
 
     setNewTagName("");
     setNewTagColor("#58a6ff");
     setIsCreatingTag(false);
   };
 
-  // Prepara la eliminación (abre el modal)
   const handleDeleteTagClick = (tagName) => {
     setTagToDelete(tagName);
   };
 
-  // Ejecuta la eliminación real
   const confirmTagDeletion = () => {
     if (tagToDelete) {
         setAvailableTags(availableTags.filter(t => t.name !== tagToDelete));
-        // Opcional: También quitarla de la tarea actual si la tenía puesta
         setEditTaskTags(editTaskTags.filter(t => t.name !== tagToDelete));
         setTagToDelete(null);
     }
@@ -253,7 +246,6 @@ export const KanbanBoard = ({ user, onLogout }) => {
     }
   };
 
-  // Modales
   const openCreateColumnModal = () => {
     setNewColumnTitle("");
     setShowAddColumnModal(true);
@@ -454,9 +446,7 @@ export const KanbanBoard = ({ user, onLogout }) => {
                     )}
                   </div>
 
-                  {/* Vistas de etiquetas */}
                   {isCreatingTag ? (
-                    // MODO CREACIÓN
                     <div style={{ background: "#161c22", padding: "10px", borderRadius: "5px", border: "1px solid #30363d" }}>
                       <div style={{ marginBottom: "8px" }}>
                         <label style={{ fontSize: "0.8rem", color: "#8b949e" }}>Nombre:</label>
@@ -484,7 +474,6 @@ export const KanbanBoard = ({ user, onLogout }) => {
                       </div>
                     </div>
                   ) : isManagingTags ? (
-                    // MODO GESTIÓN (Con el scrollbar arreglado gracias al CSS)
                     <div
                       className="tags-management-list"
                       style={{
@@ -520,7 +509,6 @@ export const KanbanBoard = ({ user, onLogout }) => {
                       </div>
                     </div>
                   ) : (
-                    // MODO SELECCIÓN
                     <select
                       className="modal-input"
                       value=""

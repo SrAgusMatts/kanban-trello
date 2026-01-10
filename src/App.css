@@ -253,7 +253,6 @@ body {
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  margin-left: 20px;
 }
 
 .btn-add-column:hover {
